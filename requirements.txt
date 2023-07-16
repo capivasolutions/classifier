@@ -1,0 +1,6 @@
+fastapi==0.99.1
+numpy==1.25.1
+python-dotenv==1.0.0
+uvicorn==0.22.0
+-f https://download.pytorch.org/whl/torch_stable.html 
+torch==2.0.1
