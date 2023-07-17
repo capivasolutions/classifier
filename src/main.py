@@ -82,5 +82,4 @@ async def create_transaction(transaction: Transaction):
 
 
 if __name__ == '__main__':
-    # server api
-    uvicorn.run("main:app", host="0.0.0.0", port=4000, reload=True)
+    uvicorn.run("main:app", host=Environment.CLASSIFIER_HOST, port=Environment.CLASSIFIER_PORT, reload=True)
