@@ -1,17 +1,12 @@
 import __main__
-import torch
 import uvicorn
 import numpy as np
+from joblib import load
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from mlp import MLP
 from config import Logger, Environment
 from transaction import Transaction, TransactionClassificationMapper
-from torch.autograd import Variable
-
-
-setattr(__main__, "MLP", MLP)
 
 app = FastAPI(
     title="Classifier service",
@@ -29,12 +24,11 @@ logger = Logger.get_instance()
 @app.on_event("startup")
 async def startup_event():
     """
-    Initialize FastAPI and PyTorch model
+    Initialize FastAPI and Sckit-learn model
     """
     logger.debug('Loading AI Classifier model')
-    model = torch.load(Environment.CLASSIFIER_MODEL_PATH,
-                       map_location=torch.device('cpu'))
-    model.eval()
+    model = load(Environment.CLASSIFIER_MODEL_PATH)
+    
     app.package = {"model": model}
     logger.debug('AI Classifier model loaded')
 
@@ -63,14 +57,11 @@ async def create_transaction(transaction: Transaction):
         transaction.amount
     ]])
 
-    # Turning data into a Variable for pytorch
-    entry = Variable(torch.from_numpy(data)).float()
-
     # Classifying the entry
-    classification = model(entry)
+    classification = model.predict(data)
 
     # Finally extracting the predicted class
-    classification = classification.argmax().item()
+    classification = classification[0]
 
     # Parse result to enum value
     classification_enum = TransactionClassificationMapper.to_model(
